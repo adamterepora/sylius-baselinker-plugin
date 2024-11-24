@@ -20,6 +20,7 @@ use Spinbits\SyliusBaselinkerPlugin\Rest\Response;
 use Spinbits\SyliusBaselinkerPlugin\Rest\ResponseError;
 use Spinbits\SyliusBaselinkerPlugin\Rest\ResponseInterface;
 use Exception;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
 
 class RequestHandler
 {
@@ -30,11 +31,16 @@ class RequestHandler
 
     private string $password;
 
+    private ChannelContextInterface $channelContext;
+
     /**
      * @param string $password
      */
-    public function __construct(string $password)
-    {
+    public function __construct(
+        ChannelContextInterface $channelContext,
+        string $password
+    ) {
+        $this->channelContext = $channelContext;
         $this->password = $password;
     }
 
@@ -93,7 +99,10 @@ class RequestHandler
         if (null === $input->password()) {
             throw new InvalidArgumentException("Missing password parameter");
         }
-        if ($input->password() !== $this->password) {
+//        if ($input->password() !== $this->password) {
+//            throw new ForbiddenException("Wrong password");
+//        }
+        if ($input->password() !== $this->channelContext->getChannel()->getBaselinker()) {
             throw new ForbiddenException("Wrong password");
         }
     }
